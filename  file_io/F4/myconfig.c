@@ -118,11 +118,16 @@ HashTable *parse_config(const char *filename) {
     
 
     while (fgets(line, sizeof(line), fp)) {
-        // 你的代码：
         // 1. 跳过开头的空白，得到 p
+        char *p = trim(line);
         // 2. 如果 *p 是 '#' 或 '\n' 或 '\0'，continue
+        if(*p=='#'||*p==' '||*p=='n'||*p=='\0'||*p=='\r') continue;
         // 3. 用 strchr 找 '='
+        char *eq=strchr(p,'=');
+        
+
         // 4. 没有 '=' 就 continue
+        if(!eq) continue;
         // 5. 把 '=' 替换成 '\0'，key = p，value = eq + 1
         // 6. ht_put(ht, trim(key), trim(value))
     }
