@@ -23,13 +23,13 @@ gcc -o mywc mywc.c
 
 测试：
 
-输入	行数	单词数	字符数
-空文件	0	0	0
-hello	0	1	5
-hello\n	1	1	6
-hello world	0	2	11
-hello world	0	2	13
-hello\nworld\n	2	2	12
-\n\n\n	3	0	3
-三个空格	0	0	3
+输入	            行数	单词数	字符数
+空文件	            0	    0	    0
+hello	            0	    1	    5
+hello\n	            1	    1	    6
+hello world	        0	    2	    11
+hello world	        0	    2	    13
+hello\nworld\n	    2	    2	    12
+\n\n\n	            3	    0	    3
+三个空格	         0	     0	     3
 与系统 wc 结果一致。

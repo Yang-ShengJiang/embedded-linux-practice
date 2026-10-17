@@ -5,7 +5,3 @@ log_path=/var/log/gateway.log
 # 连接配置
 max_connections=1000
 buffer_size = 4096
-
-# 空行会被忽略
-
-debug_mode=1

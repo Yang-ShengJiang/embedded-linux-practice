@@ -1,6 +1,9 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+
 
 typedef struct HashNode {
     char *key;
@@ -11,6 +14,7 @@ typedef struct HashNode {
 typedef struct{
     HashNode **buckets;
     int size;
+    int count;
 }HashTable;
 
 int hash(char *key,int size){
@@ -26,7 +30,8 @@ HashTable *ht_create(int size){
     HashTable *ht=malloc(sizeof(HashTable));
     if(!ht) return NULL;
     ht->size=size;
-    ht->buckets=malloc(sizeof(HashNode)*size);
+    ht->count=0;
+    ht->buckets=malloc(sizeof(HashNode*)*size);
     if(!ht->buckets){
         free(ht);
         return NULL;
@@ -42,20 +47,23 @@ void ht_put(HashTable *ht, char *key, char *value){
     HashNode *p=ht->buckets[idx];
     while(p){
         if(strcmp(p->key,key)==0){
+            free(p->value);
             p->value=strdup(value);
             return;
         }
         p=p->next;
     }
     HashNode *node=malloc(sizeof(HashNode));
-    if(!node){
-        free(ht);
-        return;
-    }
+    if(!node) return;
     node->key=strdup(key);
     node->value=strdup(value);
     node->next=ht->buckets[idx];
     ht->buckets[idx]=node;
+    ht->count++;
+}
+
+int ht_count(HashTable *ht){
+    return ht->count;
 }
 
 char *ht_get(HashTable *ht, char *key){
@@ -63,7 +71,7 @@ char *ht_get(HashTable *ht, char *key){
     HashNode *p=ht->buckets[idx];
     while(p){
         if(strcmp(p->key,key)==0){
-            return strdup(p->value);
+            return p->value;
         }
         p=p->next;
     }
@@ -86,8 +94,26 @@ void ht_destroy(HashTable *ht){
     free(ht->buckets);
     free(ht);
 }
-void ht_print(HashTable *ht){
 
+void get_emp(HashTable *ht,char *key){
+    char *p=ht_get(ht,key);
+    printf("查询 %s: ",key);
+    if(!p){
+        printf("(不存在)\n");
+    }else{
+        printf("%s\n",p);
+    }
+}
+
+void ht_print(HashTable *ht){
+    printf("共打印%d个配置项\n",ht->count);
+    for(int i=0;i<ht->size;i++){
+        HashNode *p=ht->buckets[i];
+        while(p){
+            printf("%s = %s\n",p->key,p->value);
+            p=p->next;
+        }
+    }
 }   // 新增：打印所有配置项
 
 // 去除字符串首尾空白字符（空格、制表符、换行）
@@ -99,7 +125,7 @@ char *trim(char *s) {
     char *end=s+strlen(s)-1;
     while(end>s&&(*end==' '||*end=='\n'||*end=='\t'||*end=='\r')){
         *end='\0';
-        s--;
+        end--;
     }
     // 3. 返回新起点
     return s;
@@ -116,20 +142,20 @@ HashTable *parse_config(const char *filename) {
     HashTable *ht = ht_create(100);
     char line[1024];
     
-
-    while (fgets(line, sizeof(line), fp)) {
+    while (fgets(line, sizeof(line), fp)) {   
         // 1. 跳过开头的空白，得到 p
-        char *p = trim(line);
+        char *p=trim(line);
         // 2. 如果 *p 是 '#' 或 '\n' 或 '\0'，continue
-        if(*p=='#'||*p==' '||*p=='n'||*p=='\0'||*p=='\r') continue;
+        if(*p=='\0'||*p=='#') continue;
         // 3. 用 strchr 找 '='
         char *eq=strchr(p,'=');
-        
-
         // 4. 没有 '=' 就 continue
         if(!eq) continue;
         // 5. 把 '=' 替换成 '\0'，key = p，value = eq + 1
-        // 6. ht_put(ht, trim(key), trim(value))
+        *eq='\0';
+        char *key=p;
+        char *value=eq+1;
+        ht_put(ht, trim(key), trim(value));
     }
 
     fclose(fp);
@@ -146,8 +172,11 @@ int main(int argc, char *argv[]) {
     if (ht == NULL) return 1;
 
     // 1. 打印所有配置项
+    ht_print(ht);
     // 2. 查询 server_port
+    get_emp(ht,"server_port");
     // 3. 查询一个不存在的 key
+    get_emp(ht,"old");
 
     ht_destroy(ht);
     return 0;
