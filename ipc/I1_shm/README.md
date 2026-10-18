@@ -11,5 +11,5 @@ I1：POSIX 共享内存通信
 - 区分 exit 与 _exit：子进程使用 _exit 退出，避免错误触发父进程注册的清理函数。
 
 编译运行：
-gcc -o shm_test shm_test.c -lrt -pthread
-./shm_test
+gcc -o shm shm.c -lrt -pthread
+./shm

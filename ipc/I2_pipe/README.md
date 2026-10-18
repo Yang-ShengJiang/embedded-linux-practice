@@ -10,5 +10,5 @@ I2：管道通信（Pipe）
 - _exit()：子进程结束后使用 _exit()，避免刷新缓冲区污染父进程。
 
 编译运行：
-gcc -o pipe_test pipe_test.c
-./pipe_test
+gcc -o pipe pipe.c
+./pipe
